@@ -28,6 +28,9 @@ public class ApiProvider {
         service.setRegistry(new RegistryConfig("zookeeper://192.168.0.102:2181"));
         service.setInterface(HelloService.class);
         service.setRef(new HelloServiceImpl());
+        // 使用自定义的filter
+        service.setFilter("logacy-block");
+        // 暴露服务
         service.export();
         System.out.println("api-provider is running.");
         System.in.read();

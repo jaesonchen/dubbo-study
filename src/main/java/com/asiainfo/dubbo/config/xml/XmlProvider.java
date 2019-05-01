@@ -17,7 +17,7 @@ public class XmlProvider {
     public static void main(String[] args) throws IOException {
         
         try (ClassPathXmlApplicationContext context = 
-                new ClassPathXmlApplicationContext(new String[] { "classpath:dubbo-provider.xml" })) {
+                new ClassPathXmlApplicationContext(new String[] { "classpath:provider.xml" })) {
             context.start();
             System.in.read();
         }

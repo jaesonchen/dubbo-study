@@ -3,6 +3,8 @@ package com.asiainfo.dubbo.config.api;
 import org.apache.dubbo.config.ApplicationConfig;
 import org.apache.dubbo.config.ReferenceConfig;
 import org.apache.dubbo.config.RegistryConfig;
+import org.apache.dubbo.rpc.RpcContext;
+import org.apache.dubbo.rpc.service.EchoService;
 
 import com.asiainfo.dubbo.config.service.HelloService;
 import com.asiainfo.dubbo.config.service.User;
@@ -30,9 +32,13 @@ public class ApiConsumer {
         reference.setRegistry(new RegistryConfig("zookeeper://192.168.0.102:2181"));
         reference.setInterface(HelloService.class);
         HelloService helloService = reference.get();
-
+        // attachment
+        RpcContext.getContext().setAttachment("index", "1");
         Object message = helloService.hello("chenzq");
         System.out.println(message);
+        // echo
+        EchoService echoService = (EchoService) helloService;
+        System.out.println("echo result: " + echoService.$echo("OK"));
         
         message = helloService.save(new User("chenzq", 30));
         System.out.println(message);

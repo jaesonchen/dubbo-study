@@ -3,6 +3,7 @@ package com.asiainfo.dubbo.config.service;
 import java.util.concurrent.CompletableFuture;
 
 import org.apache.dubbo.config.annotation.Service;
+import org.apache.dubbo.rpc.RpcContext;
 
 /**   
  * @Description: provider service 实现
@@ -12,11 +13,13 @@ import org.apache.dubbo.config.annotation.Service;
  * @version V1.0
  * @Copyright: Copyright(c) 2019 jaesonchen.com Inc. All rights reserved. 
  */
+//@Service(version = "1.0.0", methods = { @Method(name = "save", timeout = 3000, retries = 0) })
 @Service(version = "1.0.0")
 public class HelloServiceImpl implements HelloService {
 
     @Override
     public String hello(String name) {
+        System.out.println("consumer.index = " + RpcContext.getContext().getAttachment("index"));
         return "hello " + name;
     }
 
