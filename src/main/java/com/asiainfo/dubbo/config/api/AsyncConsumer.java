@@ -28,7 +28,7 @@ public class AsyncConsumer {
         //System.setProperty("java.net.preferIPv6Addresses", "true");
         ReferenceConfig<HelloService> reference = new ReferenceConfig<>();
         ApplicationConfig appConfig = new ApplicationConfig("async-consumer");
-        // 这里莫名其妙的是true，启动时报qos绑定地址错误
+        // 同一台电脑上同时跑provider/consumer，不配置启动时报qos绑定地址错误
         appConfig.setQosEnable(false);
         reference.setApplication(appConfig);
         reference.setRegistry(new RegistryConfig("zookeeper://192.168.0.102:2181"));

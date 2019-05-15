@@ -30,15 +30,15 @@ public class ConsumerApplication {
     public String sayHello(@PathVariable("name") String name) {
         return this.helloService.hello(name);
     }
-
+    
+    @PostConstruct
+    public void init() {
+        System.err.println(helloService.hello("jaeson"));
+    }
+    
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(new Class<?>[] { ConsumerApplication.class });
         app.setAdditionalProfiles(new String[] { "consumer" });
         app.run(args);
-    }
-	
-    @PostConstruct
-    public void init() {
-    	System.err.println(helloService.hello("jaeson"));
     }
 }

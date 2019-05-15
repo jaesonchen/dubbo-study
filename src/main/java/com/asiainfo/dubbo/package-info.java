@@ -16,7 +16,7 @@
     <dubbo:consumer check="false" />
     关闭单个服务的启动时检查 (没有提供者时报错)：
     <dubbo:reference interface="com.foo.BarService" check="false" />
-    通过 dubbo.properties
+    通过 dubbo.properties配置：
     dubbo.reference.com.foo.BarService.check=false
     dubbo.reference.check=false //强制改变所有 reference 的 check 值，就算配置中有声明，也会被覆盖。
     dubbo.consumer.check=false  //设置 check 的缺省值，如果配置中有显式的声明，如：<dubbo:reference check="true"/>，不会受影响。
@@ -24,22 +24,22 @@
     
     集群容错(cluster -> [service, reference], retries -> [service, method, reference, refer-menthod])
     在集群调用失败时，Dubbo 提供了多种容错方案，缺省为 failover 重试，通常配合retries使用。
-    Failover
+  - Failover
     失败自动切换，当出现失败，重试其它服务器。通常用于读操作，但重试会带来更长延迟。可通过 retries="2" 来设置重试次数(不含第一次)。
     <dubbo:service retries="2" />
     <dubbo:reference retries="2" />
     <dubbo:reference>
         <dubbo:method name="findFoo" retries="2" />
     </dubbo:reference>
-    Failfast
+  - Failfast
     快速失败，只发起一次调用，失败立即报错。通常用于非幂等性的写操作，比如新增记录。
-    Failsafe
+  - Failsafe
     失败安全，出现异常时，直接忽略。通常用于写入审计日志等操作。
-    Failback
+  - Failback
     失败自动恢复，后台记录失败请求，定时重发。通常用于消息通知操作。
-    Forking
+  - Forking
     并行调用多个服务器，只要一个成功即返回。通常用于实时性要求较高的读操作，但需要浪费更多服务资源。可通过 forks="2" 来设置最大并行数。
-    Broadcast
+  - Broadcast
     广播调用所有提供者，逐个调用，任意一台报错则报错 。通常用于通知所有提供者更新缓存或日志等本地资源信息。
     <dubbo:service cluster="failsafe" />
     <dubbo:reference cluster="failsafe" />
@@ -71,25 +71,26 @@
     </dubbo:reference>
     
     
-    线程模型(dispatcher -> [protocol], threadpool -> [protocol], threads -> [protocol])
+    线程模型(dispatcher, threadpool, threads -> [protocol])
     dubbo线程模型类似于netty里的boss线程负责监听所有事件，没有work线程池的独立selector用于监听socket读事件，
-    这里所谓的线程池就是真正用于处理一个socket里读写事件的Task的普通线程池。
+    这里所谓的线程池就是用于处理一个socket里读写事件的Runnable Task的普通线程池。
     如果事件处理的逻辑能迅速完成，并且不会发起新的 IO 请求，比如只是在内存中记个标识，则直接在 IO 线程上处理更快，因为减少了线程池调度。
     但如果事件处理逻辑较慢，或者需要发起新的 IO 请求，比如需要查询数据库，则必须派发到线程池，否则 IO 线程阻塞，将导致不能接收其它请求。
     需要通过不同的派发策略和不同的线程池配置的组合来应对不同的场景:
     <dubbo:protocol name="dubbo" dispatcher="all" threadpool="fixed" threads="100" />
-    Dispatcher
+  - dispatcher
     all 所有消息都派发到线程池，包括请求，响应，连接事件，断开事件，心跳等。
     direct 所有消息都不派发到线程池，全部在 IO 线程上直接执行。
     message 只有请求响应消息派发到线程池，其它连接、断开事件，心跳等消息，直接在 IO 线程上执行。
-    ThreadPool
+  - threadpool
     fixed 固定大小线程池，启动时建立线程，不关闭，一直持有。(缺省)
     cached 缓存线程池，空闲一分钟自动删除，需要时重建。
     limited 可伸缩线程池，但池中的线程数只会增长不会收缩。只增长不收缩的目的是为了避免收缩时突然来了大流量引起的性能问题。
     eager 优先创建Worker线程池。在任务数量大于corePoolSize但是小于maximumPoolSize时，优先创建Worker来处理任务。
           当任务数量大于maximumPoolSize时，将任务放入阻塞队列中。阻塞队列充满时抛出RejectedExecutionException。
           (相比于cached:cached在任务数量超过maximumPoolSize时直接抛出异常而不是将任务放入阻塞队列)
-    
+  - threads 线程池大小
+      
     
     协议(name -> [protocol, service, reference])
     Dubbo 允许配置多协议，在不同服务上支持不同协议或者同一服务上同时支持多种协议。
@@ -101,15 +102,16 @@
     <dubbo:service interface="com.alibaba.hello.api.HelloService" version="1.0.0" ref="helloService" protocol="dubbo" />
     <!-- 使用hessian协议暴露服务 -->
     <dubbo:service interface="com.alibaba.hello.api.DemoService" version="1.0.0" ref="demoService" protocol="hessian" /> 
-    <!-- 使用多个协议暴露服务 -->
+    <!-- 使用多个协议暴露服务，用逗号分隔 -->
     <dubbo:service interface="com.alibaba.hello.api.PublicService" version="1.0.0" protocol="dubbo,hessian" />
     
     
-    注册中心(id -> [protocol], address -> [protocol], default -> [protocol], registry -> [service, reference])
+    注册中心(id, address, default -> [registry], registry -> [service, reference])
     Dubbo 支持同一服务向多注册中心同时注册，或者不同服务分别注册到不同的注册中心上去
     多注册中心注册
     <!-- 多注册中心配置，竖号分隔表示同时连接多个不同注册中心，同一注册中心的多个集群地址用逗号分隔 -->
     <dubbo:registry id="chinaRegistry" address="10.20.141.150:9090" />
+    <!-- default 默认true -->
     <dubbo:registry id="intlRegistry" address="10.20.141.151:9010" default="false" />
     <!-- 向多个注册中心注册 -->
     <dubbo:service interface="com.alibaba.hello.api.HelloService" version="1.0.0" ref="helloService" registry="hangzhouRegistry,qingdaoRegistry" />
